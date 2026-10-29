@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FRIENDS Mall | Mall Directory</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #172033;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 25px 7%;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        header p {
+            margin-bottom: 0;
+            color: #dbeafe;
+        }
+
+        .hero {
+            padding: 45px 7%;
+            background: linear-gradient(120deg, #2563eb, #7c3aed);
+            color: white;
+        }
+
+        .hero h2 {
+            font-size: 32px;
+            margin: 0 0 12px;
+        }
+
+        .hero p {
+            line-height: 1.6;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 650px;
+            padding: 15px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        main {
+            padding: 30px 7%;
+        }
+
+        .section-title {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .floor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .floor-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .floor-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px #17255415;
+        }
+
+        .floor-card h3 {
+            margin-top: 0;
+            color: #1d4ed8;
+        }
+
+        .floor-card p {
+            line-height: 1.5;
+            color: #475569;
+        }
+
+        .directory {
+            margin-top: 40px;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filters button {
+            padding: 10px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .filters button.active {
+            background: #1d4ed8;
+            color: white;
+            border-color: #1d4ed8;
+        }
+
+        .store-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 15px;
+        }
+
+        .store-card {
+            background: white;
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 4px solid #2563eb;
+            box-shadow: 0 2px 8px #1725540a;
+        }
+
+        .store-card h3 {
+            margin: 0 0 12px;
+            font-size: 17px;
+        }
+
+        .store-card p {
+            margin: 0;
+            color: #475569;
+        }
+
+        .floor-label {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 5px 9px;
+            border-radius: 5px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        #result-count {
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+
+        footer {
+            margin-top: 45px;
+            padding: 25px;
+            text-align: center;
+            background: #172554;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 25px;
+            }
+
+            .hero h2 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>FRIENDS Mall</h1>
+        <p>Your guide to every floor, store and facility.</p>
+    </header>
+
+    <section class="hero">
+        <h2>Find Your Store. Find Your Floor.</h2>
+
+        <p>
+            Search for shops, restaurants, entertainment and facilities
+            inside FRIENDS Mall.
+        </p>
+
+        <input
+            type="search"
+            id="search"
+            class="search-box"
+            placeholder="Search stores or facilities..."
+            aria-label="Search mall directory"
+        >
+    </section>
+
+    <main>
+
+        <section>
+            <h2 class="section-title">Explore Mall Floors</h2>
+
+            <div class="floor-grid">
+
+                <article class="floor-card" data-floor="B2">
+                    <h3>Basement 2 (B2)</h3>
+                    <p>Car parking, two-wheeler parking and EV charging.</p>
+                </article>
+
+                <article class="floor-card" data-floor="B1">
+                    <h3>Basement 1 (B1)</h3>
+                    <p>Parking, mall entrance and valet drop-off.</p>
+                </article>
+
+                <article class="floor-card" data-floor="GF">
+                    <h3>Ground Floor (GF)</h3>
+                    <p>Fashion, footwear, beauty and groceries.</p>
+                </article>
+
+                <article class="floor-card" data-floor="1F">
+                    <h3>First Floor (1F)</h3>
+                    <p>Electronics, mobile phones and gadgets.</p>
+                </article>
+
+                <article class="floor-card" data-floor="2F">
+                    <h3>Second Floor (2F)</h3>
+                    <p>Kids' stores, toys and children's play zone.</p>
+                </article>
+
+                <article class="floor-card" data-floor="3F">
+                    <h3>Third Floor (3F)</h3>
+                    <p>Food court, restaurants, cafes and desserts.</p>
+                </article>
+
+                <article class="floor-card" data-floor="4F">
+                    <h3>Fourth Floor (4F)</h3>
+                    <p>Cinema hall and entertainment arcade.</p>
+                </article>
+
+            </div>
+        </section>
+
+        <section class="directory">
+
+            <h2 class="section-title">Mall Store Directory</h2>
+
+            <div class="filters" id="filters">
+                <button class="active" data-category="All">All</button>
+                <button data-category="Fashion">Fashion</button>
+                <button data-category="Electronics">Electronics</button>
+                <button data-category="Groceries">Groceries</button>
+                <button data-category="Kids">Kids</button>
+                <button data-category="Food">Food</button>
+                <button data-category="Entertainment">Entertainment</button>
+                <button data-category="Facilities">Facilities</button>
+            </div>
+
+            <p id="result-count" aria-live="polite"></p>
+
+            <div class="store-list" id="store-list"></div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 FRIENDS Mall | Mall Directory</p>
+        <p>Find stores and facilities across all floors.</p>
+    </footer>
+
+    <script>
+        const stores = [
+            { name: "Reliance Trends", floor: "GF", category: "Fashion" },
+            { name: "Westside", floor: "GF", category: "Fashion" },
+            { name: "Max Fashion", floor: "GF", category: "Fashion" },
+            { name: "Pantaloons", floor: "GF", category: "Fashion" },
+            { name: "Centro", floor: "GF", category: "Fashion" },
+            { name: "Bata", floor: "GF", category: "Fashion" },
+            { name: "Nykaa", floor: "GF", category: "Fashion" },
+            { name: "Titan World", floor: "GF", category: "Fashion" },
+            { name: "Lenskart", floor: "GF", category: "Fashion" },
+
+            { name: "DMart", floor: "GF", category: "Groceries" },
+
+            { name: "Reliance Digital", floor: "1F", category: "Electronics" },
+            { name: "Croma", floor: "1F", category: "Electronics" },
+            { name: "Apple Premium Reseller", floor: "1F", category: "Electronics" },
+            { name: "Samsung Experience Store", floor: "1F", category: "Electronics" },
+            { name: "OnePlus Store", floor: "1F", category: "Electronics" },
+            { name: "Xiaomi Store", floor: "1F", category: "Electronics" },
+            { name: "HP World", floor: "1F", category: "Electronics" },
+            { name: "Dell Store", floor: "1F", category: "Electronics" },
+
+            { name: "Hamleys", floor: "2F", category: "Kids" },
+            { name: "LEGO Store", floor: "2F", category: "Kids" },
+            { name: "FirstCry", floor: "2F", category: "Kids" },
+            { name: "Mothercare", floor: "2F", category: "Kids" },
+            { name: "Kids Play Zone", floor: "2F", category: "Kids" },
+
+            { name: "McDonald's", floor: "3F", category: "Food" },
+            { name: "KFC", floor: "3F", category: "Food" },
+            { name: "Burger King", floor: "3F", category: "Food" },
+            { name: "Domino's Pizza", floor: "3F", category: "Food" },
+            { name: "Pizza Hut", floor: "3F", category: "Food" },
+            { name: "Subway", floor: "3F", category: "Food" },
+            { name: "Haldiram's", floor: "3F", category: "Food" },
+            { name: "Paradise Biryani", floor: "3F", category: "Food" },
+            { name: "Pista House", floor: "3F", category: "Food" },
+            { name: "Wow! Momo", floor: "3F", category: "Food" },
+            { name: "Starbucks", floor: "3F", category: "Food" },
+            { name: "Chai Point", floor: "3F", category: "Food" },
+            { name: "Baskin Robbins", floor: "3F", category: "Food" },
+            { name: "Belgian Waffle Co.", floor: "3F", category: "Food" },
+
+            { name: "PVR INOX Cinema", floor: "4F", category: "Entertainment" },
+            { name: "Timezone Arcade", floor: "4F", category: "Entertainment" },
+            { name: "Bowling Alley", floor: "4F", category: "Entertainment" },
+
+            { name: "Information Desk", floor: "GF", category: "Facilities" },
+            { name: "Lost and Found", floor: "GF", category: "Facilities" },
+            { name: "Washrooms", floor: "GF", category: "Facilities" },
+            { name: "Washrooms", floor: "1F", category: "Facilities" },
+            { name: "Washrooms", floor: "2F", category: "Facilities" },
+            { name: "Washrooms", floor: "3F", category: "Facilities" },
+            { name: "Washrooms", floor: "4F", category: "Facilities" },
+            { name: "Wheelchair Assistance", floor: "GF", category: "Facilities" },
+            { name: "Lifts and Escalators", floor: "GF", category: "Facilities" },
+
+            { name: "Car Parking", floor: "B2", category: "Facilities" },
+            { name: "Two-Wheeler Parking", floor: "B2", category: "Facilities" },
+            { name: "EV Charging", floor: "B2", category: "Facilities" },
+            { name: "Car Parking", floor: "B1", category: "Facilities" },
+            { name: "Valet Drop-off", floor: "B1", category: "Facilities" }
+        ];
+
+        const searchInput = document.getElementById("search");
+        const storeList = document.getElementById("store-list");
+        const resultCount = document.getElementById("result-count");
+        const filterButtons = document.querySelectorAll("#filters button");
+        const floorCards = document.querySelectorAll(".floor-card");
+
+        let selectedCategory = "All";
+        let selectedFloor = null;
+
+        function renderStores() {
+            const query = searchInput.value.trim().toLowerCase();
+
+            const results = stores.filter(store => {
+                const matchesSearch =
+                    store.name.toLowerCase().includes(query) ||
+                    store.floor.toLowerCase().includes(query) ||
+                    store.category.toLowerCase().includes(query);
+
+                const matchesCategory =
+                    selectedCategory === "All" ||
+                    store.category === selectedCategory;
+
+                const matchesFloor =
+                    selectedFloor === null ||
+                    store.floor === selectedFloor;
+
+                return matchesSearch && matchesCategory && matchesFloor;
+            });
+
+            storeList.innerHTML = "";
+
+            resultCount.textContent =
+                `${results.length} location(s) found`;
+
+            if (results.length === 0) {
+                storeList.innerHTML =
+                    "<p>No matching stores or facilities found.</p>";
+                return;
+            }
+
+            results.forEach(store => {
+                const card = document.createElement("article");
+                card.className = "store-card";
+
+                const name = document.createElement("h3");
+                name.textContent = store.name;
+
+                const category = document.createElement("p");
+                category.textContent = `Category: ${store.category}`;
+
+                const floor = document.createElement("span");
+                floor.className = "floor-label";
+                floor.textContent = `Floor: ${store.floor}`;
+
+                card.append(name, category, floor);
+                storeList.appendChild(card);
+            });
+        }
+
+        searchInput.addEventListener("input", renderStores);
+
+        filterButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                selectedCategory = button.dataset.category;
+
+                filterButtons.forEach(item =>
+                    item.classList.remove("active")
+                );
+
+                button.classList.add("active");
+                renderStores();
+            });
+        });
+
+        floorCards.forEach(card => {
+            card.addEventListener("click", () => {
+                selectedFloor = card.dataset.floor;
+                searchInput.value = "";
+
+                filterButtons.forEach(button => {
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.category === "All"
+                    );
+                });
+
+                selectedCategory = "All";
+
+                document.querySelector(".directory").scrollIntoView({
+                    behavior: "smooth"
+                });
+
+                renderStores();
+            });
+        });
+
+        renderStores();
+    </script>
+
+</body>
+</html>
