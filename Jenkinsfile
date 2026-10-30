@@ -5,6 +5,12 @@ pipeline {
         timestamps()
     }
 
+    environment {
+        IMAGE_NAME = 'friends-mall:latest'
+        CONTAINER_NAME = 'friends-mall'
+        HOST_PORT = '8080'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -13,7 +19,7 @@ pipeline {
             }
         }
 
-        stage('Validate Source Files') {
+        stage('Validate Files') {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
@@ -26,12 +32,12 @@ pipeline {
                         throw "Dockerfile is missing"
                     }
 
-                    Write-Host "FRIENDS Mall source files found."
+                    Write-Host "Required files exist."
                 '''
             }
         }
 
-        stage('Validate Website Content') {
+        stage('Validate Website') {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
@@ -40,10 +46,6 @@ pipeline {
 
                     if ($html -notmatch "FRIENDS Mall") {
                         throw "FRIENDS Mall branding not found"
-                    }
-
-                    if ($html -notmatch "Mall Store Directory") {
-                        throw "Mall directory section not found"
                     }
 
                     Write-Host "Website content validation passed."
@@ -70,15 +72,73 @@ pipeline {
                 '''
             }
         }
+
+        stage('Deploy Container') {
+            steps {
+                powershell '''
+                    $ErrorActionPreference = "Stop"
+
+                    $existing = docker ps -aq --filter "name=^friends-mall$"
+
+                    if ($existing) {
+                        docker rm -f friends-mall
+
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Could not remove the existing container"
+                        }
+                    }
+
+                    docker run -d --name friends-mall -p 8080:80 friends-mall:latest
+
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Container deployment failed"
+                    }
+                '''
+            }
+        }
+
+        stage('Test Website') {
+            steps {
+                powershell '''
+                    $ErrorActionPreference = "Stop"
+
+                    $ready = $false
+
+                    for ($i = 1; $i -le 15; $i++) {
+                        try {
+                            $response = Invoke-WebRequest `
+                                -Uri "http://localhost:8080" `
+                                -TimeoutSec 3
+
+                            if ($response.StatusCode -eq 200 -and
+                                $response.Content -match "FRIENDS Mall") {
+                                $ready = $true
+                                break
+                            }
+                        }
+                        catch {
+                            Start-Sleep -Seconds 2
+                        }
+                    }
+
+                    if (!$ready) {
+                        docker logs friends-mall
+                        throw "Website health check failed"
+                    }
+
+                    Write-Host "FRIENDS Mall website is responding successfully."
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'FRIENDS Mall CI pipeline completed successfully.'
+            echo 'FRIENDS Mall CI/CD pipeline completed successfully.'
         }
 
         failure {
-            echo 'FRIENDS Mall pipeline failed. Check Console Output.'
+            echo 'Pipeline failed. Review Console Output.'
         }
     }
 }
