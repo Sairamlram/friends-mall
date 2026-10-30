@@ -5,21 +5,14 @@ pipeline {
         timestamps()
     }
 
-    environment {
-        IMAGE_NAME = 'friends-mall:latest'
-        CONTAINER_NAME = 'friends-mall'
-        HOST_PORT = '8080'
-    }
-
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Validate Files') {
+        stage('Validate Website') {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
@@ -32,37 +25,21 @@ pipeline {
                         throw "Dockerfile is missing"
                     }
 
-                    Write-Host "Required files exist."
-                '''
-            }
-        }
-
-        stage('Validate Website') {
-            steps {
-                powershell '''
-                    $ErrorActionPreference = "Stop"
-
                     $html = Get-Content "index.html" -Raw
 
                     if ($html -notmatch "FRIENDS Mall") {
                         throw "FRIENDS Mall branding not found"
                     }
 
-                    Write-Host "Website content validation passed."
+                    Write-Host "Website validation passed."
                 '''
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
-
-                    docker info
-
-                    if ($LASTEXITCODE -ne 0) {
-                        throw "Docker engine is unavailable"
-                    }
 
                     docker build -t friends-mall:latest .
 
@@ -73,60 +50,68 @@ pipeline {
             }
         }
 
-        stage('Deploy Container') {
+        stage('Test Docker Image') {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
 
-                    $existing = docker ps -aq --filter "name=^friends-mall$"
+                    docker rm -f friends-mall-test 2>$null
 
-                    if ($existing) {
-                        docker rm -f friends-mall
-
-                        if ($LASTEXITCODE -ne 0) {
-                            throw "Could not remove the existing container"
-                        }
-                    }
-
-                    docker run -d --name friends-mall -p 8080:80 friends-mall:latest
+                    docker run -d --name friends-mall-test `
+                        -p 8082:80 friends-mall:latest
 
                     if ($LASTEXITCODE -ne 0) {
-                        throw "Container deployment failed"
+                        throw "Test container failed to start"
+                    }
+
+                    try {
+                        $ready = $false
+
+                        for ($i = 1; $i -le 15; $i++) {
+                            try {
+                                $response = Invoke-WebRequest `
+                                    -Uri "http://localhost:8082" `
+                                    -TimeoutSec 3
+
+                                if ($response.StatusCode -eq 200 -and
+                                    $response.Content -match "FRIENDS Mall") {
+                                    $ready = $true
+                                    break
+                                }
+                            }
+                            catch {
+                                Start-Sleep -Seconds 2
+                            }
+                        }
+
+                        if (!$ready) {
+                            throw "Website health check failed"
+                        }
+
+                        Write-Host "Website test passed."
+                    }
+                    finally {
+                        docker rm -f friends-mall-test 2>$null
                     }
                 '''
             }
         }
 
-        stage('Test Website') {
+        stage('Deploy Website') {
             steps {
                 powershell '''
                     $ErrorActionPreference = "Stop"
 
-                    $ready = $false
+                    docker rm -f friends-mall 2>$null
 
-                    for ($i = 1; $i -le 15; $i++) {
-                        try {
-                            $response = Invoke-WebRequest `
-                                -Uri "http://localhost:8080" `
-                                -TimeoutSec 3
+                    docker run -d --name friends-mall `
+                        -p 8080:80 friends-mall:latest
 
-                            if ($response.StatusCode -eq 200 -and
-                                $response.Content -match "FRIENDS Mall") {
-                                $ready = $true
-                                break
-                            }
-                        }
-                        catch {
-                            Start-Sleep -Seconds 2
-                        }
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Website deployment failed"
                     }
 
-                    if (!$ready) {
-                        docker logs friends-mall
-                        throw "Website health check failed"
-                    }
-
-                    Write-Host "FRIENDS Mall website is responding successfully."
+                    Write-Host "FRIENDS Mall deployed."
                 '''
             }
         }
@@ -134,11 +119,11 @@ pipeline {
 
     post {
         success {
-            echo 'FRIENDS Mall CI/CD pipeline completed successfully.'
+            echo 'FRIENDS Mall pipeline completed successfully.'
         }
 
         failure {
-            echo 'Pipeline failed. Review Console Output.'
+            echo 'Pipeline failed. Check Console Output.'
         }
     }
 }
